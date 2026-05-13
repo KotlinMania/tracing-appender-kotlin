@@ -217,7 +217,7 @@ mavenPublishing {
     pom {
         name.set("tracing-appender-kotlin")
         description.set("Kotlin Multiplatform port of tokio-rs/tracin - Provides utilities for file appenders and making non-blocking writers")
-        inceptionyear.set("2026")
+        inceptionYear.set("2026")
         url.set("https://github.com/KotlinMania/tracing-appender-kotlin")
 
         licenses {
