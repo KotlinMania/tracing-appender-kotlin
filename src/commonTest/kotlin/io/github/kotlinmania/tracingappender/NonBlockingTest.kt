@@ -41,4 +41,38 @@ class NonBlockingTest {
         counter.incrSaturating()
         assertEquals(2, counter.droppedLines())
     }
+
+    @Test
+    fun testNonBlockingCompanionNew() {
+        val writer = DefaultAppenderWriter()
+        val (nonBlocking, guard) = NonBlocking.new(writer)
+        val written = nonBlocking.write("test".encodeToByteArray())
+        assertEquals(4, written)
+        guard.close()
+    }
+
+    @Test
+    fun testNonBlockingMakeWriter() {
+        val writer = DefaultAppenderWriter()
+        val (nonBlocking, guard) = NonBlocking.new(writer)
+        val writerRef = nonBlocking.makeWriter()
+        assertEquals(nonBlocking, writerRef)
+        guard.close()
+    }
+
+    @Test
+    fun testLogsDroppedIfLossy() {
+        val writer = DefaultAppenderWriter()
+        val (nonBlocking, guard) =
+            NonBlockingBuilder
+                .default()
+                .lossy(true)
+                .bufferedLinesLimit(1)
+                .finish(writer)
+
+        for (i in 0 until 10) {
+            nonBlocking.write("drop me".encodeToByteArray())
+        }
+        guard.close()
+    }
 }

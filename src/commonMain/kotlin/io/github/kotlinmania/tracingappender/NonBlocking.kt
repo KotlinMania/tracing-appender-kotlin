@@ -19,7 +19,7 @@ public const val DEFAULT_BUFFERED_LINES_LIMIT: Int = 128_000
 /**
  * A guard that flushes spans and events associated to a [NonBlocking] writer upon close.
  */
-public class WorkerGuard(
+public class WorkerGuard internal constructor(
     private val scope: CoroutineScope?,
     private val sender: Channel<Msg>,
     private val shutdown: Channel<Unit>,
@@ -36,10 +36,10 @@ public class WorkerGuard(
 /**
  * Tracks the number of times a log line was dropped by the background worker.
  */
-public class ErrorCounter {
+public class ErrorCounter(
     @Volatile
-    private var count: Int = 0
-
+    private var count: Int = 0,
+) {
     /**
      * Returns the count of dropped log lines.
      */
@@ -58,7 +58,7 @@ public class ErrorCounter {
 /**
  * A non-blocking writer that enqueues log messages to a dedicated worker.
  */
-public class NonBlocking(
+public class NonBlocking internal constructor(
     private val channel: Channel<Msg>,
     private val errorCounter: ErrorCounter,
     public val isLossy: Boolean,
@@ -80,6 +80,11 @@ public class NonBlocking(
     override fun flush() {
         // Channel-buffered messages are periodically flushed by the worker
     }
+
+    /**
+     * Returns a writer for emitting log messages.
+     */
+    public fun makeWriter(): NonBlocking = this
 
     public companion object {
         /**
@@ -105,7 +110,7 @@ public class NonBlocking(
             val errorCounter = ErrorCounter()
 
             val scope = CoroutineScope(Dispatchers.Default + SupervisorJob() + CoroutineName(threadName))
-            val worker = Worker(channel, writer, shutdown)
+            val worker = Worker.new(channel, writer, shutdown)
             val job = worker.workerThread(threadName, scope)
 
             val guard = WorkerGuard(scope, channel, shutdown, job)

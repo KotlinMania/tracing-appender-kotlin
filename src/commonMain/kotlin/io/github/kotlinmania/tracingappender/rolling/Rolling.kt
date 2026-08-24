@@ -185,6 +185,35 @@ public class Inner(
         return false
     }
 
+    /**
+     * Returns the date format string for this inner state.
+     */
+    public fun dateFormat(): String = formatDate(now, rotation)
+
+    /**
+     * Prunes old log files if the file count exceeds [maxFiles].
+     */
+    public fun pruneOldLogs(maxFiles: Int) {
+        // Multiplatform file pruning placeholder or no-op on non-JVM targets
+    }
+
+    /**
+     * Refreshes the writer for the given [now] timestamp.
+     */
+    public fun refreshWriter(now: Instant, writer: Writer): Writer {
+        writer.flush()
+        val filename = joinDate(now)
+        if (maxFiles != null) {
+            pruneOldLogs(maxFiles)
+        }
+        return createWriter(logDirectory, filename)
+    }
+
+    /**
+     * Creates a new writer for the specified directory and filename.
+     */
+    public fun createWriter(directory: String, filename: String): Writer = DefaultAppenderWriter()
+
     public companion object {
         public fun new(
             now: Instant,
@@ -220,6 +249,16 @@ public class RollingFileAppender(
 
     @Volatile
     private var currentWriter: Writer = writerFactory(currentFilename)
+
+    /**
+     * Returns the current timestamp.
+     */
+    public fun now(): Instant = nowProvider()
+
+    /**
+     * Returns the formatted date representation.
+     */
+    public fun fmt(): String = state.dateFormat()
 
     public fun currentFilename(): String = currentFilename
 

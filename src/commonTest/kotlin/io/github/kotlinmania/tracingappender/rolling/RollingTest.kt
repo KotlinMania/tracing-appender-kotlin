@@ -187,4 +187,28 @@ class RollingTest {
         assertEquals(14, written)
         writer.flush()
     }
+
+    @Test
+    fun testInnerAndAppenderMethods() {
+        val now = Instant.parse("2026-08-23T17:15:00Z")
+        val inner =
+            Inner.new(
+                now = now,
+                rotation = Rotation.DAILY,
+                directory = "/tmp/logs",
+                prefix = "app",
+                suffix = "log",
+                maxFiles = 5,
+            )
+        assertEquals("2026-08-23", inner.dateFormat())
+        val defaultWriter = inner.createWriter("/tmp/logs", "app.2026-08-23.log")
+        assertNotNull(defaultWriter)
+        val refreshed = inner.refreshWriter(now, defaultWriter)
+        assertNotNull(refreshed)
+        inner.pruneOldLogs(5)
+
+        val appender = RollingFileAppender(inner, nowProvider = { now })
+        assertEquals("2026-08-23", appender.fmt())
+        assertEquals(now, appender.now())
+    }
 }

@@ -14,24 +14,24 @@ import kotlinx.coroutines.launch
 /**
  * Message sent across the channel to the logging worker.
  */
-public sealed class Msg {
+internal sealed class Msg {
     /**
      * A log line message containing byte payload.
      */
-    public class Line(
-        public val msg: ByteArray,
+    class Line(
+        val msg: ByteArray,
     ) : Msg()
 
     /**
      * Signal to shut down the worker thread.
      */
-    public object Shutdown : Msg()
+    object Shutdown : Msg()
 }
 
 /**
  * State returned after processing a batch of log items.
  */
-public enum class WorkerState {
+internal enum class WorkerState {
     Empty,
     Disconnected,
     Continue,
@@ -41,12 +41,12 @@ public enum class WorkerState {
 /**
  * Worker responsible for receiving messages from channel and writing to destination.
  */
-public class Worker<T : Writer>(
+internal class Worker<T : Writer>(
     private val receiver: Channel<Msg>,
     private val writer: T,
     private val shutdown: Channel<Unit>,
 ) {
-    public fun handleRecv(result: Result<Msg>): WorkerState =
+    fun handleRecv(result: Result<Msg>): WorkerState =
         result.fold(
             onSuccess = { msg ->
                 when (msg) {
@@ -62,7 +62,7 @@ public class Worker<T : Writer>(
             },
         )
 
-    public fun handleTryRecv(result: Result<Msg?>): WorkerState =
+    fun handleTryRecv(result: Result<Msg?>): WorkerState =
         result.fold(
             onSuccess = { msg ->
                 when (msg) {
@@ -82,7 +82,7 @@ public class Worker<T : Writer>(
     /**
      * Receives messages from channel and writes them to the underlying writer until empty.
      */
-    public suspend fun work(): WorkerState {
+    suspend fun work(): WorkerState {
         val firstMsg =
             try {
                 Result.success(receiver.receive())
@@ -115,7 +115,7 @@ public class Worker<T : Writer>(
     /**
      * Creates and launches a coroutine worker processing messages.
      */
-    public fun workerThread(
+    fun workerThread(
         name: String,
         scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob() + CoroutineName(name)),
     ): Job =
@@ -136,4 +136,12 @@ public class Worker<T : Writer>(
                 println("Failed to flush. Error: $e")
             }
         }
+
+    companion object {
+        fun <T : Writer> new(
+            receiver: Channel<Msg>,
+            writer: T,
+            shutdown: Channel<Unit>,
+        ): Worker<T> = Worker(receiver, writer, shutdown)
+    }
 }

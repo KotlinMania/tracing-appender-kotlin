@@ -7,7 +7,14 @@ package io.github.kotlinmania.tracingappender.rolling
 public class InitError(
     public val context: String,
     cause: Throwable? = null,
-) : Exception(if (cause != null) "$context: ${cause.message}" else context, cause)
+) : Exception(if (cause != null) "$context: ${cause.message}" else context, cause) {
+    public companion object {
+        /**
+         * Creates a function returning an [InitError] with the specified [context].
+         */
+        public fun ctx(context: String): (Throwable) -> InitError = { InitError(context, it) }
+    }
+}
 
 /**
  * A builder for configuring [RollingFileAppender]s.
@@ -60,5 +67,10 @@ public class Builder(
          * Returns a new [Builder] with default parameters.
          */
         public fun new(): Builder = Builder()
+
+        /**
+         * Returns a new [Builder] with default parameters.
+         */
+        public fun default(): Builder = new()
     }
 }
