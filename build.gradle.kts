@@ -770,16 +770,20 @@ tasks.register("hostTests") {
 tasks.register("swiftExportSmokeTest") {
     group = "verification"
     description = "Builds the Swift Export SPM package and runs swift test against it."
+    mustRunAfter("hostTests")
     outputs.upToDateWhen { false }
 
     doLast {
         val execOperations = serviceOf<ExecOperations>()
-        val swiftBuildDir =
+        val swiftBuildDirFile =
             layout.buildDirectory
                 .dir("swift-test")
                 .get()
                 .asFile
-                .absolutePath
+        swiftBuildDirFile.deleteRecursively()
+        swiftBuildDirFile.mkdirs()
+        val swiftBuildDir = swiftBuildDirFile.absolutePath
+        layout.buildDirectory.dir("bin/macosArm64/SwiftExportBinaryDebugStatic").get().asFile.mkdirs()
         execOperations
             .exec {
                 workingDir = projectDir
@@ -814,8 +818,8 @@ tasks.register("swiftExportSmokeTest") {
             if (!text.contains("platforms:")) {
                 generatedPackageSwift.writeText(
                     text.replaceFirst(
-                        Regex("(name:\\s*\"[^\"]*\",)"),
-                        "\$1\n    platforms: [.macOS(.v14)],",
+                        Regex("""(let package = Package\s*\(\s*name:\s*"[^"]*",)"""),
+                        "$1\n    platforms: [.macOS(.v14)],",
                     ),
                 )
             }
