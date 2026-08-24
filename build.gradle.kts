@@ -701,6 +701,31 @@ mavenPublishing {
     }
 }
 
+tasks.configureEach {
+    if (name.endsWith("GenerateSPMPackage")) {
+        doLast {
+            val spmDir =
+                layout.buildDirectory
+                    .dir("SPMPackage")
+                    .orNull
+                    ?.asFile
+            if (spmDir != null && spmDir.exists()) {
+                spmDir.walkTopDown().filter { it.name == "Package.swift" }.forEach { file ->
+                    val text = file.readText()
+                    if (!text.contains("platforms:")) {
+                        file.writeText(
+                            text.replaceFirst(
+                                Regex("""(let package = Package\s*\(\s*name:\s*"[^"]*",)"""),
+                                "$1\n    platforms: [.macOS(.v14)],",
+                            ),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 // ============================================================================
 // Tasks
 // ============================================================================
@@ -711,8 +736,7 @@ mavenPublishing {
 tasks.register("test") {
     group = "verification"
     description = "Runs the commonTest-backed KMP suite, Android host tests, and Swift Export smoke test."
-    dependsOn("allTests")
-    dependsOn("testAndroidHostTest")
+    dependsOn("hostTests")
     dependsOn("swiftExportSmokeTest")
 }
 

@@ -38,4 +38,18 @@ class BuilderTest {
         val builder = Builder.new().maxLogFiles(0)
         assertNull(builder.maxFiles)
     }
+
+    @Test
+    fun testBuilderDefault() {
+        val builder = Builder.default()
+        assertEquals(Rotation.NEVER, builder.rotation)
+    }
+
+    @Test
+    fun testInitErrorCtx() {
+        val errorFn = InitError.ctx("failed to initialize")
+        val err = errorFn(IllegalArgumentException("bad path"))
+        assertEquals("failed to initialize", err.context)
+        assertEquals("failed to initialize: bad path", err.message)
+    }
 }
