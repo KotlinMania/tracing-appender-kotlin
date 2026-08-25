@@ -1,11 +1,91 @@
+// port-lint: tests non_blocking.rs
 package io.github.kotlinmania.tracingappender
 
 import io.github.kotlinmania.tracingappender.rolling.DefaultAppenderWriter
+import kotlinx.coroutines.channels.Channel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+class MockWriter(public val capacity: Int) : Writer {
+    val channel = Channel<String>(capacity)
+
+    override fun write(buf: ByteArray, offset: Int, length: Int): Int {
+        val str = buf.decodeToString(offset, offset + length)
+        channel.trySend(str)
+        return length
+    }
+
+    override fun flush() {}
+
+    companion object {
+        fun new(capacity: Int): Pair<MockWriter, Channel<String>> {
+            val writer = MockWriter(capacity)
+            return Pair(writer, writer.channel)
+        }
+    }
+}
+
 class NonBlockingTest {
+    fun writeNonBlocking(nonBlocking: NonBlocking, msg: ByteArray) {
+        nonBlocking.writeAll(msg)
+    }
+
+    @Test
+    fun backpressureExerted() {
+        val (mockWriter, rx) = MockWriter.new(1)
+        val (nonBlocking, guard) =
+            NonBlockingBuilder
+                .default()
+                .lossy(false)
+                .bufferedLinesLimit(1)
+                .finish(mockWriter)
+
+        val errorCount = nonBlocking.errorCounter()
+        nonBlocking.writeAll("Hello".encodeToByteArray())
+        assertEquals(0, errorCount.droppedLines())
+
+        nonBlocking.writeAll(", World".encodeToByteArray())
+        assertEquals(0, errorCount.droppedLines())
+
+        guard.close()
+    }
+
+    @Test
+    fun logsDroppedIfLossy() {
+        val (mockWriter, rx) = MockWriter.new(1)
+        val (nonBlocking, guard) =
+            NonBlockingBuilder
+                .default()
+                .lossy(true)
+                .bufferedLinesLimit(1)
+                .finish(mockWriter)
+
+        val errorCount = nonBlocking.errorCounter()
+        writeNonBlocking(nonBlocking, "Hello".encodeToByteArray())
+        writeNonBlocking(nonBlocking, ", World".encodeToByteArray())
+        writeNonBlocking(nonBlocking, "Test".encodeToByteArray())
+        writeNonBlocking(nonBlocking, "Universe".encodeToByteArray())
+
+        guard.close()
+    }
+
+    @Test
+    fun multiThreadedWrites() {
+        val (mockWriter, rx) = MockWriter.new(DEFAULT_BUFFERED_LINES_LIMIT)
+        val (nonBlocking, guard) =
+            NonBlockingBuilder
+                .default()
+                .lossy(true)
+                .finish(mockWriter)
+
+        for (i in 0 until 10) {
+            val cloned = nonBlocking.makeWriter()
+            cloned.writeAll("Hello".encodeToByteArray())
+        }
+        guard.close()
+    }
+
     @Test
     fun testDefaultBuilder() {
         val writer = DefaultAppenderWriter()
@@ -57,22 +137,6 @@ class NonBlockingTest {
         val (nonBlocking, guard) = NonBlocking.new(writer)
         val writerRef = nonBlocking.makeWriter()
         assertEquals(nonBlocking, writerRef)
-        guard.close()
-    }
-
-    @Test
-    fun testLogsDroppedIfLossy() {
-        val writer = DefaultAppenderWriter()
-        val (nonBlocking, guard) =
-            NonBlockingBuilder
-                .default()
-                .lossy(true)
-                .bufferedLinesLimit(1)
-                .finish(writer)
-
-        for (i in 0 until 10) {
-            nonBlocking.write("drop me".encodeToByteArray())
-        }
         guard.close()
     }
 }

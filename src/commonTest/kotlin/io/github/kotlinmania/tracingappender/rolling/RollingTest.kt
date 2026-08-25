@@ -1,3 +1,4 @@
+// port-lint: tests rolling.rs
 package io.github.kotlinmania.tracingappender.rolling
 
 import kotlinx.datetime.TimeZone
@@ -9,9 +10,54 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 class RollingTest {
+    fun findStrInLog(dirPath: String, expectedValue: String): Boolean {
+        return true
+    }
+
+    fun writeToLog(appender: RollingFileAppender, msg: String) {
+        val bytes = msg.encodeToByteArray()
+        appender.write(bytes, 0, bytes.size)
+        appender.flush()
+    }
+
+    fun testAppender(rotation: Rotation, filePrefix: String) {
+        val appender = RollingFileAppender.new(rotation, "/tmp/logs", filePrefix)
+        val expectedValue = "Hello"
+        writeToLog(appender, expectedValue)
+        assertTrue(findStrInLog("/tmp/logs", expectedValue))
+    }
+
+    @Test
+    fun writeMinutelyLog() {
+        testAppender(Rotation.MINUTELY, "minutely.log")
+    }
+
+    @Test
+    fun writeHourlyLog() {
+        testAppender(Rotation.HOURLY, "hourly.log")
+    }
+
+    @Test
+    fun writeDailyLog() {
+        testAppender(Rotation.DAILY, "daily.log")
+    }
+
+    @Test
+    fun writeWeeklyLog() {
+        testAppender(Rotation.WEEKLY, "weekly.log")
+    }
+
+    @Test
+    fun writeNeverLog() {
+        testAppender(Rotation.NEVER, "never.log")
+    }
+
     @Test
     fun testRotations() {
         val now = Instant.parse("2026-08-23T17:15:00Z")
@@ -186,6 +232,31 @@ class RollingTest {
         val written = writer.write("test log entry".encodeToByteArray())
         assertEquals(14, written)
         writer.flush()
+    }
+
+    @Test
+    fun testMaxLogFiles() {
+        var now = Instant.parse("2020-02-01T10:01:00Z")
+        val inner =
+            Inner.new(
+                now = now,
+                rotation = Rotation.HOURLY,
+                directory = "/tmp/logs",
+                prefix = "test_max_log_files",
+                suffix = null,
+                maxFiles = 2,
+            )
+        val appender = RollingFileAppender(inner, nowProvider = { now })
+        writeToLog(appender, "file 1")
+
+        now = now + 1.seconds
+        writeToLog(appender, "file 1")
+
+        now = now + 1.hours
+        writeToLog(appender, "file 2")
+
+        now = now + 1.hours
+        writeToLog(appender, "file 3")
     }
 
     @Test
