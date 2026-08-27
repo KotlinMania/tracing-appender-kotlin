@@ -1,3 +1,4 @@
+// port-lint: tests tracing-appender/src/sync.rs
 package io.github.kotlinmania.tracingappender
 
 import io.github.kotlinmania.tracingappender.sync.RwLock
