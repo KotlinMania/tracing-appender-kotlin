@@ -1,4 +1,4 @@
-// port-lint: tests tracing-appender/src/worker.rs
+// port-lint: tests worker.rs
 package io.github.kotlinmania.tracingappender
 
 import io.github.kotlinmania.tracingappender.rolling.DefaultAppenderWriter
