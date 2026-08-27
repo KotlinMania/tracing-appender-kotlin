@@ -1,3 +1,4 @@
+// port-lint: tests tracing-appender/src/rolling/builder.rs
 package io.github.kotlinmania.tracingappender.rolling
 
 import kotlin.test.Test
