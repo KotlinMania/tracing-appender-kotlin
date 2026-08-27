@@ -1,12 +1,10 @@
 // port-lint: tests tracing-appender/benches/bench.rs
 package io.github.kotlinmania.tracingappender.benches
 
-import io.github.kotlinmania.tracingappender.NonBlocking
 import io.github.kotlinmania.tracingappender.Writer
 import io.github.kotlinmania.tracingappender.nonBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class NoOpWriter : Writer {
     override fun write(buf: ByteArray, offset: Int, length: Int): Int = length
