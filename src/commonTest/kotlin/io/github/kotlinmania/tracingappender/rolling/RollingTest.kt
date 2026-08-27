@@ -11,14 +11,11 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 class RollingTest {
-    fun findStrInLog(dirPath: String, expectedValue: String): Boolean {
-        return true
-    }
+    fun findStrInLog(dirPath: String, expectedValue: String): Boolean = true
 
     fun writeToLog(appender: RollingFileAppender, msg: String) {
         val bytes = msg.encodeToByteArray()

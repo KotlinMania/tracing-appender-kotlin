@@ -7,7 +7,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class MockWriter(public val capacity: Int) : Writer {
+class MockWriter(
+    public val capacity: Int,
+) : Writer {
     val channel = Channel<String>(capacity)
 
     override fun write(buf: ByteArray, offset: Int, length: Int): Int {
