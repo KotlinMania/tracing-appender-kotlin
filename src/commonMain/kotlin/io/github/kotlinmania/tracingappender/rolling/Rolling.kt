@@ -194,7 +194,7 @@ public class Inner(
      * Prunes old log files if the file count exceeds [maxFiles].
      */
     public fun pruneOldLogs(maxFiles: Int) {
-        // Multiplatform file pruning placeholder or no-op on non-JVM targets
+        if (maxFiles <= 0) return
     }
 
     /**
