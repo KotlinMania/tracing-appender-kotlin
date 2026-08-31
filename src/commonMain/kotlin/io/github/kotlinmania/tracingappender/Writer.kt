@@ -1,4 +1,4 @@
-// port-lint: source non_blocking.rs
+// port-lint: source tracing-appender/src/non_blocking.rs
 package io.github.kotlinmania.tracingappender
 
 /**

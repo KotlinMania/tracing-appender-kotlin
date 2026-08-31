@@ -1,4 +1,4 @@
-// port-lint: tests rolling.rs
+// port-lint: tests tracing-appender/src/rolling.rs
 package io.github.kotlinmania.tracingappender.rolling
 
 import kotlinx.datetime.TimeZone
