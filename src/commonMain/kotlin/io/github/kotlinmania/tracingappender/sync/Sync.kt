@@ -1,4 +1,4 @@
-// port-lint: source sync.rs
+// port-lint: source tracing-appender/src/sync.rs
 package io.github.kotlinmania.tracingappender.sync
 
 import kotlin.concurrent.Volatile

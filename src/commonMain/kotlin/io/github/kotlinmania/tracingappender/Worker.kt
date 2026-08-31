@@ -1,4 +1,4 @@
-// port-lint: source worker.rs
+// port-lint: source tracing-appender/src/worker.rs
 package io.github.kotlinmania.tracingappender
 
 import kotlinx.coroutines.CoroutineName

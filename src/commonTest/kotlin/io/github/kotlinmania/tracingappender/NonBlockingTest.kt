@@ -1,4 +1,4 @@
-// port-lint: tests non_blocking.rs
+// port-lint: tests tracing-appender/src/non_blocking.rs
 package io.github.kotlinmania.tracingappender
 
 import io.github.kotlinmania.tracingappender.rolling.DefaultAppenderWriter
