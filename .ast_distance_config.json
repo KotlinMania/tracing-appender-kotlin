@@ -2,7 +2,7 @@
   "type": "port",
   "name": "tracing-appender-kotlin",
   "source": {
-    "path": "tmp/tracing-appender/src",
+    "path": "tmp",
     "lang": "rust"
   },
   "target": {
