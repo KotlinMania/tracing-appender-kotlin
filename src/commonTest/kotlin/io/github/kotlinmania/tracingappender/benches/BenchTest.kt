@@ -1,4 +1,4 @@
-// port-lint: tests tracing-appender/benches/bench.rs
+// port-lint: tests ../benches/bench.rs
 package io.github.kotlinmania.tracingappender.benches
 
 import io.github.kotlinmania.tracingappender.Writer
