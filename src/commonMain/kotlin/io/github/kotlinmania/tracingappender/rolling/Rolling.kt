@@ -1,4 +1,4 @@
-// port-lint: source tracing-appender/src/rolling.rs
+// port-lint: source rolling.rs
 package io.github.kotlinmania.tracingappender.rolling
 
 import io.github.kotlinmania.tracingappender.Writer
