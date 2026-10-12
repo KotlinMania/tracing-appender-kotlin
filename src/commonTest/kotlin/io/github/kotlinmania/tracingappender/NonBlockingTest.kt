@@ -35,7 +35,7 @@ class NonBlockingTest {
 
     @Test
     fun backpressureExerted() {
-        val (mockWriter, rx) = MockWriter.new(1)
+        val (mockWriter, _) = MockWriter.new(1)
         val (nonBlocking, guard) =
             NonBlockingBuilder
                 .default()
@@ -55,7 +55,7 @@ class NonBlockingTest {
 
     @Test
     fun logsDroppedIfLossy() {
-        val (mockWriter, rx) = MockWriter.new(1)
+        val (mockWriter, _) = MockWriter.new(1)
         val (nonBlocking, guard) =
             NonBlockingBuilder
                 .default()
@@ -65,6 +65,7 @@ class NonBlockingTest {
 
         val errorCount = nonBlocking.errorCounter()
         writeNonBlocking(nonBlocking, "Hello".encodeToByteArray())
+        assertEquals(0, errorCount.droppedLines())
         writeNonBlocking(nonBlocking, ", World".encodeToByteArray())
         writeNonBlocking(nonBlocking, "Test".encodeToByteArray())
         writeNonBlocking(nonBlocking, "Universe".encodeToByteArray())
@@ -74,14 +75,14 @@ class NonBlockingTest {
 
     @Test
     fun multiThreadedWrites() {
-        val (mockWriter, rx) = MockWriter.new(DEFAULT_BUFFERED_LINES_LIMIT)
+        val (mockWriter, _) = MockWriter.new(DEFAULT_BUFFERED_LINES_LIMIT)
         val (nonBlocking, guard) =
             NonBlockingBuilder
                 .default()
                 .lossy(true)
                 .finish(mockWriter)
 
-        for (i in 0 until 10) {
+        repeat(10) {
             val cloned = nonBlocking.makeWriter()
             cloned.writeAll("Hello".encodeToByteArray())
         }

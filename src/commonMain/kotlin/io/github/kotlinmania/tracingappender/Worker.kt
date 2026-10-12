@@ -54,7 +54,10 @@ internal class Worker<T : Writer>(
                         writer.writeAll(msg.msg)
                         WorkerState.Continue
                     }
-                    is Msg.Shutdown -> WorkerState.Shutdown
+
+                    is Msg.Shutdown -> {
+                        WorkerState.Shutdown
+                    }
                 }
             },
             onFailure = {
@@ -70,8 +73,14 @@ internal class Worker<T : Writer>(
                         writer.writeAll(msg.msg)
                         WorkerState.Continue
                     }
-                    is Msg.Shutdown -> WorkerState.Shutdown
-                    null -> WorkerState.Empty
+
+                    is Msg.Shutdown -> {
+                        WorkerState.Shutdown
+                    }
+
+                    null -> {
+                        WorkerState.Empty
+                    }
                 }
             },
             onFailure = {
