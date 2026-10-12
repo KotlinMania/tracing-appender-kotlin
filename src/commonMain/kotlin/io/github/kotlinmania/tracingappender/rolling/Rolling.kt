@@ -55,14 +55,17 @@ public data class Rotation(
                 LocalDateTime(ldt.year, ldt.month, ldt.day, ldt.hour, ldt.minute, 0, 0)
                     .toInstant(TimeZone.UTC)
             }
+
             RotationKind.Hourly -> {
                 LocalDateTime(ldt.year, ldt.month, ldt.day, ldt.hour, 0, 0, 0)
                     .toInstant(TimeZone.UTC)
             }
+
             RotationKind.Daily -> {
                 LocalDateTime(ldt.year, ldt.month, ldt.day, 0, 0, 0, 0)
                     .toInstant(TimeZone.UTC)
             }
+
             RotationKind.Weekly -> {
                 val daysSinceSunday = if (ldt.dayOfWeek == DayOfWeek.SUNDAY) 0 else ldt.dayOfWeek.isoDayNumber
                 val sundayDate = date - daysSinceSunday.days
@@ -70,6 +73,7 @@ public data class Rotation(
                 LocalDateTime(sundayLdt.year, sundayLdt.month, sundayLdt.day, 0, 0, 0, 0)
                     .toInstant(TimeZone.UTC)
             }
+
             RotationKind.Never -> {
                 error("Rotation::NEVER is impossible to round.")
             }

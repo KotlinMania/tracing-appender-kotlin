@@ -22,7 +22,7 @@ class BenchTest {
     fun synchronousBenchmark(): Long {
         val writer = NoOpWriter.new()
         val data = "event".encodeToByteArray()
-        for (i in 0 until 1000) {
+        repeat(1000) {
             writer.write(data, 0, data.size)
         }
         return 1000L
@@ -31,7 +31,7 @@ class BenchTest {
     fun nonBlockingBenchmark(): Long {
         val (nonBlocking, guard) = nonBlocking(NoOpWriter.new())
         val data = "event".encodeToByteArray()
-        for (i in 0 until 1000) {
+        repeat(1000) {
             nonBlocking.write(data, 0, data.size)
         }
         guard.close()
