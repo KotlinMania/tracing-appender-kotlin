@@ -1,13 +1,18 @@
 // port-lint: source rolling/builder.rs
 package io.github.kotlinmania.tracingappender.rolling
 
+import io.github.kotlinmania.thiserror.StdError
+
 /**
  * Errors returned by [Builder.build] or when initializing a rolling file appender.
  */
 public class InitError(
     public val context: String,
     cause: Throwable? = null,
-) : Exception(if (cause != null) "$context: ${cause.message}" else context, cause) {
+) : Exception(if (cause != null) "$context: ${cause.message}" else context, cause),
+    StdError {
+    override fun source(): StdError? = cause as? StdError
+
     public companion object {
         /**
          * Creates a function returning an [InitError] with the specified [context].
